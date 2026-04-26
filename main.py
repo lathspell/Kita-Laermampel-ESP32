@@ -18,7 +18,7 @@ Verdrahtung
   Drehschalter 2 — gelb→rot  (Common → GND)
     GPIO 33  → Bit 0
     GPIO 32  → Bit 1
-    GPIO 15  → Bit 2
+    GPIO 13  → Bit 2
     GPIO  4  → Bit 3
 
   GND / 3V3 → Mikrofon-Modul (VCC an 3V3)
@@ -49,32 +49,32 @@ MIC_PIN = 34    # MAX4466 Ausgang (ADC1, Input-only Pin)
 # BCD-Drehschalter: Bit-Pins in aufsteigender Wertigkeit [bit0, bit1, bit2, bit3]
 # Common-Pin jedes Schalters → GND; interne Pull-ups aktiv
 SW1_PINS = [25, 26, 27, 14]   # Schalter 1: grün→gelb
-SW2_PINS = [33, 32, 15,  4]   # Schalter 2: gelb→rot
+SW2_PINS = [33, 32, 13,  4]   # Schalter 2: gelb→rot
 
 LEDS_PER_FIELD = 36    # LEDs pro Ampelfeld (4 Reihen à 9 LEDs im Zickzack)
 NUM_FIELDS     = 3
 TOTAL_LEDS     = LEDS_PER_FIELD * NUM_FIELDS   # = 108
 
-BRIGHTNESS = 0.6   # 60% → Worst Case ~1.16 A, sicher für 1.5 A USB-Netzteil
+BRIGHTNESS_NORMAL = 0.40   # 40% Helligkeit ist indoor absolut ausreichend (stromsparend)
+BRIGHTNESS_ECO    = 0.10   # 10% Helligkeit im Schlafmodus (sehr stromsparend)
+ECO_DELAY_MS      = 60000  # Nach 60 Sekunden Dauer-Grün wird abgedimmt
 
 # Feldindizes im LED-Streifen (Streifen läuft von unten nach oben)
 FIELD_GREEN  = 0   # unten
 FIELD_YELLOW = 1   # Mitte
 FIELD_RED    = 2   # oben
 
-# Farben (skaliert auf BRIGHTNESS)
-def _scale(r, g, b):
-    return (int(r * BRIGHTNESS), int(g * BRIGHTNESS), int(b * BRIGHTNESS))
+# Farben (Basiswerte unskaliert)
+def _scale(r, g, b, brightness):
+    return (int(r * brightness), int(g * brightness), int(b * brightness))
 
-COLOR_GREEN  = _scale(0,   255, 0)
-COLOR_YELLOW = _scale(255, 200, 0)
-COLOR_RED    = _scale(255, 0,   0)
 COLOR_OFF    = (0, 0, 0)
+BASE_GREEN   = (0,   255, 0)
+BASE_YELLOW  = (255, 200, 0)
+BASE_RED     = (255, 0,   0)
 
 # Lautstärkemessung
-ADC_SAMPLES  = 50   # Samples pro RMS-Messung  (50 × 2 ms ≈ 100 ms/Messung)
-SAMPLE_DELAY = 2    # ms zwischen ADC-Samples
-WINDOW_SIZE  = 5    # Gleitender Mittelwert über N Messungen (≈ 0.5 s)
+WINDOW_SIZE  = 25   # Gleitender Mittelwert über N Messungen (≈ 1,5 - 2 s)
 
 # Schwellwerte in RMS-Einheiten für die 4 Schalterstellungen (Index 0 = Stellung 1)
 # !! Nach Kalibrierung des MAX4466 anpassen !!
@@ -126,9 +126,9 @@ def all_off():
 
 def startup_test():
     """Selbsttest: Grün → Gelb → Rot → Aus."""
-    for field, color in [(FIELD_GREEN,  COLOR_GREEN),
-                         (FIELD_YELLOW, COLOR_YELLOW),
-                         (FIELD_RED,    COLOR_RED)]:
+    for field, color in [(FIELD_GREEN,  _scale(*BASE_GREEN, BRIGHTNESS_NORMAL)),
+                         (FIELD_YELLOW, _scale(*BASE_YELLOW, BRIGHTNESS_NORMAL)),
+                         (FIELD_RED,    _scale(*BASE_RED, BRIGHTNESS_NORMAL))]:
         _set_field(field, color)
         np.write()
         time.sleep_ms(500)
@@ -158,11 +158,11 @@ def read_thresholds():
     Schalterstellung außerhalb 1–4 wird auf die nächste gültige Grenze geklemmt.
     Garantiert: schwelle_2 > schwelle_1.
     """
-    pos1 = max(1, min(4, read_bcd(sw1)))   # Stellung 1–4 erzwingen
-    pos2 = max(1, min(4, read_bcd(sw2)))
+    pos1 = max(0, min(3, read_bcd(sw1)))   # Stellung 0-3 erzwingen
+    pos2 = max(0, min(3, read_bcd(sw2)))
 
-    t1 = THRESHOLDS_1[pos1 - 1]
-    t2 = THRESHOLDS_2[pos2 - 1]
+    t1 = THRESHOLDS_1[pos1]
+    t2 = THRESHOLDS_2[pos2]
 
     # Sicherheitsnetz: gelb/rot-Schwelle muss über grün/gelb-Schwelle liegen
     if t2 <= t1:
@@ -177,12 +177,17 @@ def measure_rms():
     Misst den Schallpegel als RMS des AC-Anteils des Mikrofonsignals.
     Der DC-Offset (Ruhe-Gleichspannung des MAX4466) wird herausgerechnet.
     """
+    start = time.ticks_ms()
     samples = []
-    for _ in range(ADC_SAMPLES):
+    # Keine künstliche Pause! So schnell sampeln wie möglich für 50ms.
+    while time.ticks_diff(time.ticks_ms(), start) < 50: 
         samples.append(mic.read())
-        time.sleep_ms(SAMPLE_DELAY)
-    mean = sum(samples) / ADC_SAMPLES
-    variance = sum((s - mean) ** 2 for s in samples) / ADC_SAMPLES
+
+    n = len(samples)
+    if n == 0:
+        return 0
+    mean = sum(samples) / n
+    variance = sum((s - mean) ** 2 for s in samples) / n
     return math.sqrt(variance)
 
 
@@ -191,6 +196,8 @@ def measure_rms():
 startup_test()
 
 rms_window = []
+current_state = None
+state_since = time.ticks_ms()
 
 while True:
     rms = measure_rms()
@@ -203,8 +210,23 @@ while True:
     t1, t2 = read_thresholds()
 
     if avg_rms < t1:
-        show(FIELD_GREEN, COLOR_GREEN)
+        new_state = FIELD_GREEN
     elif avg_rms < t2:
-        show(FIELD_YELLOW, COLOR_YELLOW)
+        new_state = FIELD_YELLOW
     else:
-        show(FIELD_RED, COLOR_RED)
+        new_state = FIELD_RED
+
+    if new_state != current_state:
+        current_state = new_state
+        state_since = time.ticks_ms()
+
+    brightness = BRIGHTNESS_NORMAL
+    if current_state == FIELD_GREEN and time.ticks_diff(time.ticks_ms(), state_since) > ECO_DELAY_MS:
+        brightness = BRIGHTNESS_ECO
+
+    if current_state == FIELD_GREEN:
+        show(FIELD_GREEN, _scale(*BASE_GREEN, brightness))
+    elif current_state == FIELD_YELLOW:
+        show(FIELD_YELLOW, _scale(*BASE_YELLOW, brightness))
+    else:
+        show(FIELD_RED, _scale(*BASE_RED, brightness))

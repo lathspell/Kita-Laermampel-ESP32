@@ -19,11 +19,12 @@ graph LR
         G14["GPIO 14"]
         G33P["GPIO 33"]
         G32["GPIO 32"]
-        G15["GPIO 15"]
+        G13["GPIO 13"]
         G4["GPIO 4"]
     end
 
     R["Widerstand\n330-470 Ohm"]
+    FUSE["Sicherung 2A"]
 
     subgraph WS["WS2812B LED-Streifen"]
         WVCC["VCC"]
@@ -53,7 +54,7 @@ graph LR
         S28["Pin 8 (Bit 3)"]
     end
 
-    VIN --- WVCC
+    VIN --- FUSE --- WVCC
     GNDE --- WGND
     GNDE --- MGND
     GNDE --- S1C
@@ -67,7 +68,7 @@ graph LR
     G14 --- S18
     G33P --- S21
     G32 --- S22
-    G15 --- S24
+    G13 --- S24
     G4 --- S28
 ----
 
@@ -81,7 +82,8 @@ Jede Zeile = ein Kabel (oder eine direkte Lötverbindung).
 |===
 | # | Von | Nach | Hinweis
 
-| 1 | ESP32 *VIN* | WS2812B *VCC* | 5 V, rot
+| 1a | ESP32 *VIN* | *Sicherung 2A* | 5 V, rot
+| 1b | *Sicherung 2A* | WS2812B *VCC* | 5 V, rot
 | 2 | ESP32 *GND* | WS2812B *GND* | schwarz
 | 3 | ESP32 *3V3* | MAX4466 *VCC* | 3,3 V, rot
 | 4 | ESP32 *GND* | MAX4466 *GND* | schwarz
@@ -140,15 +142,16 @@ in Kabel 5 verdrahtet.
 
 | 14 | ESP32 *GPIO 33* | Laut-Regler *Pin 1* | Bit 0
 | 15 | ESP32 *GPIO 32* | Laut-Regler *Pin 2* | Bit 1
-| 16 | ESP32 *GPIO 15* | Laut-Regler *Pin 4* | Bit 2
+| 16 | ESP32 *GPIO 13* | Laut-Regler *Pin 4* | Bit 2
 | 17 | ESP32 *GPIO  4* | Laut-Regler *Pin 8* | Bit 3
 |===
 
 == Checkliste vor dem ersten Start
 
-* [ ] Alle 17 Verbindungen hergestellt
+* [ ] Alle Verbindungen hergestellt
+* [ ] Sicherung (2A) ist in der 5V-Leitung zum LED-Streifen verbaut
 * [ ] Kein GND-Kabel vergessen (Kabel 2, 4, 5, 6)
 * [ ] Widerstand liegt *zwischen* GPIO 5 und WS2812B DIN, nicht parallel
-* [ ] WS2812B VCC an *VIN* (5 V), nicht an 3V3
+* [ ] WS2812B VCC an *VIN* (5 V) (über Sicherung), nicht an 3V3
 * [ ] MAX4466 VCC an *3V3*, nicht an VIN
 * [ ] USB-Netzteil noch *nicht* eingesteckt beim Verdrahten
