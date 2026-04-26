@@ -143,10 +143,15 @@ Werte außerhalb 100–1000 Ω vermeiden
 | <1 €
 | 1–3 €
 
+| Lochrasterplatine / Breadboard
+| Kleines Lochraster-Board (z.B. 5x7 cm) oder Mini-Steckbrett für den dauerhaften Aufbau.
+| 1–2 €
+| 2–4 €
+
 | *Gesamt*
 |
-| *~14–23 €*
-| *~28–43 €*
+| *~15–25 €*
+| *~30–47 €*
 |===
 
 *Bereits vorhanden:* Holz, Butterbrotpapier, USB-Netzteil (5 V/2 A), Kabel, Breadboard, Lötkolben, Messgerät, Taster
