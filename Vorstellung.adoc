@@ -1,0 +1,80 @@
+= Kita-Lärmampel: Projektvorstellung
+:pdf-page-size: A4
+
+== Ziel
+
+Bau einer Lautstärkeampel für eine Kita-Gruppe. Die Ampel zeigt den aktuellen Geräuschpegel in drei Stufen (grün/gelb/rot) an und ist aus 6 Metern Entfernung für Kinder deutlich sichtbar.
+
+=== Bedienung für das Kita-Personal
+Die Empfindlichkeit der Ampel kann flexibel über zwei (für Kinder unsichtbare) Drehregler an der Unterseite des Gehäuses an die jeweilige Raumsituation angepasst werden:
+
+* *Linker Regler (Grün → Gelb):* Bestimmt, ab welcher Lautstärke die Vorwarnung aktiviert wird und die Ampel auf Gelb springt.
+* *Rechter Regler (Gelb → Rot):* Bestimmt, ab welcher absoluten Lautstärke die Ampel rot leuchtet.
+
+Jeder Regler rastet spürbar ein und bietet *4 Stufen*, von Stufe 1 ("sehr leise / strenge Messung") bis Stufe 4 ("sehr laut / tolerante Messung").
+
+=== Sicherheit
+Die Lärmampel ist für den sicheren Betrieb in einer Kita konzipiert. Es wird ausschließlich ungefährliche *USB-Kleinspannung (5 Volt, max. 2 Ampere)* verwendet. Zur Absicherung gegen Hardware- oder Softwaredefekte ist die Stromeinspeisung intern mit einer *Schmelzsicherung (2A, träge)* ausgestattet.
+
+== Randbedingungen
+
+* Kein WLAN/Internet-Zugang erlaubt (IT-Sicherheit)
+* Stromversorgung nur über USB-Netzteile (max. 1,5–2 A)
+* Kosten so gering wie möglich
+* Selbstbaulösung (Bastelprojekt)
+* Außer Reichweite der Kinder montiert
+
+== Einkaufsliste
+
+[cols="3,3,1,1", options="header"]
+|===
+| Bauteil | Spezifikation | AliExpress | Amazon
+
+| ESP32 DevKit v1
+| Wroom-32, 30 oder 38 Pin
+| 3–5 €
+| 8–12 €
+
+| WS2812B LED-Streifen
+| 60 LEDs/m, 2 m
+| 6–10 €
+| 12–16 €
+
+| MAX4466 Mikrofon-Modul
+| mit einstellbarem Verstärker
+| 1–2 €
+| 3–5 €
+
+| 2× kodierter Drehschalter
+| BCD, 10-stufig (4 Stufen genutzt)
+| 1–3 €
+| 3–6 €
+
+| Bilderrahmen-Aufhänger
+| 2 Stück
+| 1–2 €
+| 1–2 €
+
+| Widerstand 330–470 Ω
+| 1/4 W; 330 Ω und 470 Ω sind gleichwertig, +
+Werte außerhalb 100–1000 Ω vermeiden
+| <1 €
+| <1 €
+
+| 5×20 mm Glasrohrsicherung (2A)
+| Auslösecharakteristik: *träge (T)*. Inklusive 2× Print-Sicherungsclips für Lochrastermontage.
+| <1 €
+| 1–3 €
+
+| Lochrasterplatine / Breadboard
+| Kleines Lochraster-Board (z.B. 5x7 cm) oder Mini-Steckbrett für den dauerhaften Aufbau.
+| 1–2 €
+| 2–4 €
+
+| *Gesamt*
+|
+| *~15–25 €*
+| *~30–47 €*
+|===
+
+*Bereits vorhanden:* Holz, Butterbrotpapier, USB-Netzteil (5 V/2 A), Kabel, Breadboard, Lötkolben, Messgerät, Taster

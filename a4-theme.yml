@@ -1,0 +1,20 @@
+extends: default
+page:
+  size: A4
+  margin: [10mm, 10mm, 10mm, 10mm]
+base:
+  font_size: 7
+  line_height_length: 9
+heading:
+  h2_font_size: 10
+  h3_font_size: 9
+  margin_top: 0.1in
+  margin_bottom: 0.1in
+table:
+  cell_padding: [2, 2, 2, 2]
+  font_size: 7
+list:
+  item_spacing: 0
+  margin_bottom: 0.1in
+paragraph:
+  margin_bottom: 0.1in

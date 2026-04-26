@@ -7,6 +7,17 @@
 
 Bau einer Lautstärkeampel für eine Kita-Gruppe. Die Ampel zeigt den aktuellen Geräuschpegel in drei Stufen (grün/gelb/rot) an und ist aus 6 Metern Entfernung für Kinder deutlich sichtbar.
 
+=== Bedienung für das Kita-Personal
+Die Empfindlichkeit der Ampel kann flexibel über zwei (für Kinder unsichtbare) Drehregler an der Unterseite des Gehäuses an die jeweilige Raumsituation angepasst werden:
+
+* *Linker Regler (Grün → Gelb):* Bestimmt, ab welcher Lautstärke die Vorwarnung aktiviert wird und die Ampel auf Gelb springt.
+* *Rechter Regler (Gelb → Rot):* Bestimmt, ab welcher absoluten Lautstärke die Ampel rot leuchtet.
+
+Jeder Regler rastet spürbar ein und bietet *4 Stufen*, von Stufe 1 ("sehr leise / strenge Messung") bis Stufe 4 ("sehr laut / tolerante Messung").
+
+=== Sicherheit
+Die Lärmampel ist für den sicheren Betrieb in einer Kita konzipiert. Es wird ausschließlich ungefährliche *USB-Kleinspannung (5 Volt, max. 2 Ampere)* verwendet. Zur Absicherung gegen Hardware- oder Softwaredefekte ist die Stromeinspeisung intern mit einer *Schmelzsicherung (2A, träge)* ausgestattet.
+
 == Randbedingungen
 
 * Kein WLAN/Internet-Zugang erlaubt (IT-Sicherheit)
